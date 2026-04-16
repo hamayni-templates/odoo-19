@@ -1,0 +1,71 @@
+{
+  "contract_version": "1.1.0",
+  "template_id": "odoo-19",
+  "template_version": "1.0.0",
+  "name": "Odoo 19",
+  "description": "Odoo 19 Community ERP/CRM with PostgreSQL",
+  "artifact_type": "docker_stack",
+  "source_ref": {
+    "type": "tag",
+    "value": "v1.0.0"
+  },
+  "prerequisites": [
+    "docker",
+    "docker-compose"
+  ],
+  "runtime": {
+    "kind": "docker-compose",
+    "compose_file": "docker-compose.yml",
+    "services": [
+      "odoo",
+      "db"
+    ],
+    "ports": {
+      "http": 8069,
+      "longpolling": 8072
+    }
+  },
+  "env": [
+    {
+      "name": "POSTGRES_DB",
+      "required": false,
+      "description": "Nom de la base de données",
+      "default": "postgres"
+    },
+    {
+      "name": "POSTGRES_USER",
+      "required": false,
+      "description": "Utilisateur PostgreSQL",
+      "default": "odoo"
+    },
+    {
+      "name": "POSTGRES_PASSWORD",
+      "required": true,
+      "description": "Mot de passe PostgreSQL"
+    }
+  ],
+  "health": {
+    "checks": [
+      {
+        "path": "http://localhost:8069/web/login",
+        "expected_status": 200,
+        "timeout_s": 60
+      }
+    ],
+    "success_policy": "all"
+  },
+  "policies": {
+    "strict_mode": true,
+    "ban_latest": true,
+    "infra_requires_tag_or_commit": true
+  },
+  "postInstall": [
+    {
+      "type": "shell",
+      "cmd": "echo 'Odoo 19 is ready at http://localhost:8069'",
+      "timeout_s": 60
+    }
+  ],
+  "minAgentVersion": "2.6.0",
+  "tested": true
+}
