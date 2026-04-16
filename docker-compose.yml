@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  odoo:
+    image: odoo:19.0
+    restart: unless-stopped
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    environment:
+      HOST: db
+      PORT: 5432
+      USER: ${POSTGRES_USER:-odoo}
+      PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - odoo_addons:/mnt/extra-addons
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-odoo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  odoo_data:
+  odoo_addons:
+  pg_data:
